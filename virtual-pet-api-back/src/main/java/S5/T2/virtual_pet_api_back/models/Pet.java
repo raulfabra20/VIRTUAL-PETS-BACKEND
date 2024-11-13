@@ -20,18 +20,26 @@ public class Pet {
     @Column(name = "color")
     private String color;
 
-    @ManyToOne
-    private User user;
+    private int hungerLevel;
 
-    public Pet(){
+    private int happinessLevel;
+
+    private boolean isDisguised;
+
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
+    public Pet() {
 
     }
 
-    public Pet(PetType type, String name, String color, User user) {
+    public Pet(PetType type, String name, String color, User owner) {
         this.type = type;
         this.name = name;
         this.color = color;
-        this.user = user;
+        this.owner = owner;
     }
 
     public Long getPetId() {
@@ -62,13 +70,49 @@ public class Pet {
         this.color = color;
     }
 
-    public User getUser() {
-        return user;
+    public User getOwner() {
+        return owner;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setOwner(User user) {
+        this.owner = owner;
     }
 
+    public int getHungerLevel() {
+        return hungerLevel;
+    }
 
+    public void setHungerLevel(int hungerLevel) {
+        this.hungerLevel = hungerLevel;
+    }
+
+    public int getHappinessLevel() {
+        return happinessLevel;
+    }
+
+    public void setHappinessLevel(int happinessLevel) {
+        this.happinessLevel = happinessLevel;
+    }
+
+    public boolean isDisguised() {
+        return isDisguised;
+    }
+
+    public void setDisguised(boolean disguised) {
+        isDisguised = disguised;
+    }
+
+    public void setTypeToEnum(String type) {
+        if (type.equalsIgnoreCase("mogwai")) {
+            setType(PetType.MOGWAI);
+        } else if (type.equalsIgnoreCase("gremlin")) {
+            setType(PetType.GREMLIN);
+        } else {
+            throw new IllegalArgumentException("Not a valid type.");
+        }
+    }
+
+    public Long getOwnerId(){
+        return owner.getUserId();
+    }
 }
