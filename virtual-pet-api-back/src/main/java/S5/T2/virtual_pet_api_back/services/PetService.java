@@ -1,9 +1,12 @@
 package S5.T2.virtual_pet_api_back.services;
 
+import S5.T2.virtual_pet_api_back.exception.UserNotFoundException;
 import S5.T2.virtual_pet_api_back.models.Pet;
 import S5.T2.virtual_pet_api_back.models.User;
 import S5.T2.virtual_pet_api_back.repositories.PetRepository;
 import S5.T2.virtual_pet_api_back.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -21,16 +24,20 @@ public class PetService {
 
     private UserRepository userRepository;
 
+    private static Logger log = LoggerFactory.getLogger(PetService.class);
+
     @Autowired
-    public PetService(PetRepository petRepository) {
+    public PetService(PetRepository petRepository, UserRepository userRepository) {
         this.petRepository = petRepository;
+        this.userRepository = userRepository;
     }
 
    public Pet createPet(UserDetails userDetails, String petName, String petColor, String petType) {
        User newUser = userRepository.findByUsername(userDetails.getUsername());
         if(newUser == null){
-            throw new NoSuchElementException("user not found");
+            throw new UserNotFoundException("User not found");
         }
+        log.info("Creating pet for user with id: "+newUser.getUserId());
        Pet newPet = new Pet();
         newPet.setTypeToEnum(petType);
         newPet.setName(petName);
@@ -39,19 +46,20 @@ public class PetService {
         setPetNeeds(newPet);
         newUser.addPet(newPet);
 
+        log.info("Pet created: "+newPet.getPetId()+"\nName: "+newPet.getName()+"\nColor: "+newPet.getColor()+
+                "\nType: "+newPet.getType());
         return petRepository.save(newPet);
     }
 
     public void setPetNeeds(Pet pet){
         pet.setHungerLevel(60);
         pet.setHappinessLevel(60);
-        pet.setDisguised(false);
     }
 
     public Pet updatePet(UserDetails userDetails, Long petId, String action ) {
         User newUser = userRepository.findByUsername(userDetails.getUsername());
         if(newUser == null){
-            throw new NoSuchElementException("user not found");
+            throw new NoSuchElementException("User not found");
         }
         Pet pet = petRepository.findById(petId).orElseThrow(() -> new NoSuchElementException("Pet not found"));
 
@@ -93,7 +101,7 @@ public class PetService {
             return petRepository.findAll();
         } else {
             if (newUser != null && newUser.getUserId().equals(userId)) {
-                return petRepository.findByUserId(userId);
+                return petRepository.findByOwner_UserId(userId);
             } else {
                 throw new AccessDeniedException("Access denied to see this pet.");
             }
@@ -110,11 +118,14 @@ public class PetService {
         return pet;
     }
 
-    public Pet removePet(Long petId, UserDetails userDetails) {
+    public Pet removePet(Long petId, Authentication authentication) {
         Pet pet = petRepository.findById(petId).orElseThrow(() -> new NoSuchElementException("Pet not found"));
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         boolean isAdmin = isAdmin(userDetails);
         boolean isOwner = isOwner(userDetails, petId);
         if (isAdmin || isOwner) {
+            User newUser = userRepository.findByUsername(userDetails.getUsername());
+            newUser.removePet(pet);
             petRepository.deleteById(petId);
             return pet;
         } else {

@@ -5,9 +5,9 @@ import S5.T2.virtual_pet_api_back.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,17 +46,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Long getUserId(UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername());
-        return user.getUserId();
-    }
-
-    public User getUserByUsername(UserDetails userDetails) {
-        return userRepository.findByUsername(userDetails.getUsername());
-    }
 
     public String verify(String username, String password){
         User user = userRepository.findByUsername(username);
+        if (user == null || !encoder.matches(password, user.getPassword())) {
+            throw new BadCredentialsException("Invalid credentials");
+        }
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
         if (authentication.isAuthenticated()) {
@@ -65,8 +60,4 @@ public class UserService {
             return "fail";
         }
     }
-
-
-
-
 }

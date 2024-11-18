@@ -1,11 +1,11 @@
 package S5.T2.virtual_pet_api_back.models;
 
 public enum UserType {
-    USER,
-    ADMIN;
+    ROLE_USER,
+    ROLE_ADMIN;
 
     @Override
     public String toString() {
-        return this.name().toLowerCase(); // Ejemplo: devuelve "admin" o "user"
+        return this.name().toLowerCase();
     }
 }

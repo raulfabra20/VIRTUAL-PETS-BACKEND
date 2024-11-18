@@ -1,5 +1,6 @@
 package S5.T2.virtual_pet_api_back.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class User {
     private UserType role;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Pet> petList = new ArrayList<>();
 
     public User(){
@@ -73,9 +75,9 @@ public class User {
             throw new IllegalArgumentException("Role cannot be null.");
         }
         if(role.equalsIgnoreCase("admin")){
-            setRole(UserType.ADMIN);
+            setRole(UserType.ROLE_ADMIN);
         } else if(role.equalsIgnoreCase("user")){
-            setRole(UserType.USER);
+            setRole(UserType.ROLE_USER);
         } else {
             throw new IllegalArgumentException("Not a valid role.");
         }
@@ -91,5 +93,9 @@ public class User {
 
     public void addPet(Pet pet){
         petList.add(pet);
+    }
+
+    public void removePet(Pet pet){
+        petList.remove(pet);
     }
 }

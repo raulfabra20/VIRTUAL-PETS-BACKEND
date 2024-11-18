@@ -33,13 +33,16 @@ public class JWTService {
 
     public String generateToken(String username, String userRole){
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", userRole);
+
+        long expirationTime = 1000 * 60 * 60 * 30;
+        Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
+
         return Jwts.builder()
-                .claims()
-                .add(claims)
-                .subject(username)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()* 60 * 60 * 30))
-                .and()
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(expirationDate)
                 .signWith(getKey())
                 .compact();
     }
@@ -69,6 +72,11 @@ public class JWTService {
     public boolean validateToken(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);
         return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String extractRole(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("role", String.class);
     }
 
     private boolean isTokenExpired(String token) {

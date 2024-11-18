@@ -1,5 +1,6 @@
 package S5.T2.virtual_pet_api_back.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -24,11 +25,12 @@ public class Pet {
 
     private int happinessLevel;
 
-    private boolean isDisguised;
+    private boolean isDisguised = false;
 
 
     @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "owner_id", referencedColumnName = "userId")
+    @JsonBackReference
     private User owner;
 
     public Pet() {
@@ -74,7 +76,7 @@ public class Pet {
         return owner;
     }
 
-    public void setOwner(User user) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 
@@ -103,11 +105,9 @@ public class Pet {
     }
 
     public void setTypeToEnum(String type) {
-        if (type.equalsIgnoreCase("mogwai")) {
-            setType(PetType.MOGWAI);
-        } else if (type.equalsIgnoreCase("gremlin")) {
-            setType(PetType.GREMLIN);
-        } else {
+        try {
+            this.type = PetType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Not a valid type.");
         }
     }
