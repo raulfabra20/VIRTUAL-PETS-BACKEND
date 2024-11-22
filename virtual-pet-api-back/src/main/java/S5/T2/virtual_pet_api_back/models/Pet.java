@@ -3,6 +3,8 @@ package S5.T2.virtual_pet_api_back.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "pet")
 public class Pet {
@@ -26,6 +28,9 @@ public class Pet {
     private int happinessLevel;
 
     private boolean isDisguised = false;
+
+    @Transient
+    private LocalDateTime lastInteraction;
 
 
     @ManyToOne
@@ -104,6 +109,14 @@ public class Pet {
         isDisguised = disguised;
     }
 
+    public LocalDateTime getLastInteraction() {
+        return lastInteraction;
+    }
+
+    public void setLastInteraction(LocalDateTime lastInteraction) {
+        this.lastInteraction = lastInteraction;
+    }
+
     public void setTypeToEnum(String type) {
         try {
             this.type = PetType.valueOf(type.toUpperCase());
@@ -114,5 +127,13 @@ public class Pet {
 
     public Long getOwnerId(){
         return owner.getUserId();
+    }
+
+    public void adjustHungerLevel(int amount) {
+        this.hungerLevel = Math.max(0, Math.min(this.hungerLevel + amount, 100));
+    }
+
+    public void adjustHappinessLevel(int amount) {
+        this.happinessLevel = Math.max(0, Math.min(this.happinessLevel + amount, 100));
     }
 }

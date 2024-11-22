@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -44,6 +45,7 @@ public class PetService {
         newPet.setColor(petColor);
         newPet.setOwner(newUser);
         setPetNeeds(newPet);
+        newPet.setLastInteraction(LocalDateTime.now());
         newUser.addPet(newPet);
 
         log.info("Pet created: "+newPet.getPetId()+"\nName: "+newPet.getName()+"\nColor: "+newPet.getColor()+
@@ -65,7 +67,7 @@ public class PetService {
 
         switch (action) {
             case "feed":
-                pet.setHungerLevel(pet.getHungerLevel() + 20);
+                pet.setHungerLevel(pet.getHungerLevel() - 20);
                 pet.setHappinessLevel(pet.getHappinessLevel() + 20);
                 break;
             case "lightOn":
@@ -81,6 +83,7 @@ public class PetService {
                 throw new IllegalArgumentException("Unknown action: " + action);
         }
 
+        pet.setLastInteraction(LocalDateTime.now());
         return petRepository.save(pet);
     }
 
@@ -93,23 +96,16 @@ public class PetService {
         return petRepository.findAll();
     }
 
-    public List<Pet> getPetsByUserId(Long userId, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User newUser = userRepository.findByUsername(userDetails.getUsername());
-        boolean isAdmin = isAdmin(userDetails);
-        if (isAdmin) {
-            return petRepository.findAll();
+    public List<Pet> getPetsByUserId(Long userId) {
+        User user = userRepository.findByUserId(userId);
+        if (user != null) {
+            return petRepository.findByOwner_UserId(userId);
         } else {
-            if (newUser != null && newUser.getUserId().equals(userId)) {
-                return petRepository.findByOwner_UserId(userId);
-            } else {
-                throw new AccessDeniedException("Access denied to see this pet.");
-            }
+            throw new AccessDeniedException("Access denied to see these pets.");
         }
     }
     public Pet getPetById(Long petId, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User newUser = userRepository.findByUsername(userDetails.getUsername());
         Pet pet = petRepository.findById(petId)
                 .orElseThrow(() -> new NoSuchElementException("Pet not found"));
         if (!pet.getOwner().getUsername().equals(userDetails.getUsername())) {
@@ -148,7 +144,13 @@ public class PetService {
 
     public boolean isAdmin(UserDetails userDetails) {
         return userDetails.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equalsIgnoreCase("ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equalsIgnoreCase("ROLE_ADMIN"));
+    }
+
+    public Long getUserIdFromAuthentication(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        return user.getUserId();
     }
 
 

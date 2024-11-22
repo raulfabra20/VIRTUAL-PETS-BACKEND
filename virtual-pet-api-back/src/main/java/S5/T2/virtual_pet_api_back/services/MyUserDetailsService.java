@@ -1,5 +1,6 @@
 package S5.T2.virtual_pet_api_back.services;
 
+import S5.T2.virtual_pet_api_back.exception.UserNotFoundException;
 import S5.T2.virtual_pet_api_back.models.User;
 import S5.T2.virtual_pet_api_back.models.UserPrincipal;
 import S5.T2.virtual_pet_api_back.repositories.UserRepository;
@@ -20,7 +21,6 @@ public class MyUserDetailsService implements UserDetailsService {
     private static Logger log = LoggerFactory.getLogger(User.class);
 
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
@@ -33,4 +33,16 @@ public class MyUserDetailsService implements UserDetailsService {
 
         return new UserPrincipal(user);
     }
+
+
+    public UserDetails loadUserById(Long userId){
+        User user = userRepository.findByUserId(userId);
+
+        if(user == null){
+            log.info("User not found.");
+            throw new UserNotFoundException("User not found.");
+        }
+        return new UserPrincipal(user);
+    }
+
 }

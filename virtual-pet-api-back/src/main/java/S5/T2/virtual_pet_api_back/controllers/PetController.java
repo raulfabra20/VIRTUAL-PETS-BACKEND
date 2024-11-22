@@ -1,7 +1,11 @@
 package S5.T2.virtual_pet_api_back.controllers;
 
+import S5.T2.virtual_pet_api_back.dto.PetActionRequest;
 import S5.T2.virtual_pet_api_back.dto.PetRequest;
 import S5.T2.virtual_pet_api_back.models.Pet;
+import S5.T2.virtual_pet_api_back.models.User;
+import S5.T2.virtual_pet_api_back.models.UserPrincipal;
+import S5.T2.virtual_pet_api_back.models.UserType;
 import S5.T2.virtual_pet_api_back.services.PetService;
 import S5.T2.virtual_pet_api_back.services.UserService;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,7 +25,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/pets")
@@ -62,19 +65,6 @@ public class PetController {
        return new ResponseEntity<>(newPet, HttpStatus.CREATED);
     }
 
-
-    @Operation(summary = "Get predefined pets", description = "Returns a list of predefined pets.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of predefined pets",
-                    content = @Content(schema = @Schema(implementation = Pet.class)))
-    })
-    @GetMapping("/predefined")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public ResponseEntity<List<Pet>>  getPredeterminedPets(){
-        return ResponseEntity.ok(petService.getPredefinedPets());
-    }
-
-
     @Operation(summary = "Get pet by ID", description = "Returns the details of a pet by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Pet found",
@@ -93,15 +83,17 @@ public class PetController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = Pet.class)))),
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
-    @GetMapping("/{userId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public List<Pet> getPetsByUserId(@PathVariable Long userId, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        boolean isAdmin = petService.isAdmin(userDetails);
-        if (isAdmin) {
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public List<Pet> getPets(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userPrincipal.getUser();
+        String userRole = user.getRole().toUpperCase();
+        log.info("User's role: "+userRole);
+        if (userRole.equals(UserType.ROLE_ADMIN.name()) ) {
             return petService.getAllPets();
         } else {
-            return petService.getPetsByUserId(userId, authentication);
+            return petService.getPetsByUserId(user.getUserId());
         }
     }
 
@@ -116,12 +108,12 @@ public class PetController {
     @PostMapping("/{petId}/update")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ResponseEntity<Pet> updatePet(@PathVariable Long petId,
-                                         @RequestBody Map<String, String> payload, Authentication authentication ){
+                                         @RequestBody PetActionRequest request, Authentication authentication ){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         boolean isAdmin = petService.isAdmin(userDetails);
         boolean isOwner = petService.isOwner(userDetails, petId);
         if(isAdmin || isOwner){
-            String action = payload.get("action");
+            String action = request.getAction();
             Pet updatedPet = petService.updatePet(userDetails, petId, action);
             return ResponseEntity.ok(updatedPet);
         } else {
@@ -143,4 +135,15 @@ public class PetController {
         Pet removedPet = petService.removePet(petId, authentication);
         return new ResponseEntity<>(removedPet, HttpStatus.OK);
     }
+
+   /* @Operation(summary = "Get predefined pets", description = "Returns a list of predefined pets.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of predefined pets",
+                    content = @Content(schema = @Schema(implementation = Pet.class)))
+    })
+    @GetMapping("/predefined")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<List<Pet>>  getPredeterminedPets(){
+        return ResponseEntity.ok(petService.getPredefinedPets());
+    } */
 }

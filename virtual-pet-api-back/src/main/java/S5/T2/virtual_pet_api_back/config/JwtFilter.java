@@ -48,6 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
         if (EXCLUDED_PATHS.stream().anyMatch(path::startsWith)) {
+            log.info("Skipping authentication for public path: {}", path);
             filterChain.doFilter(request, response);
             return;
         }
