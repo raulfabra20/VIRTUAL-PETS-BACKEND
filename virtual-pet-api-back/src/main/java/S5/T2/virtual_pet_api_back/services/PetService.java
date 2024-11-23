@@ -78,10 +78,18 @@ public class PetService {
                 break;
             case "disguise":
                 pet.setDisguised(true);
+                pet.setHappinessLevel(pet.getHappinessLevel() + 10);
+                break;
+            case "disguiseOut":
+                pet.setDisguised(false);
+                pet.setHappinessLevel(pet.getHappinessLevel() - 10);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown action: " + action);
         }
+
+        pet.setHappinessLevel(Math.max(0, Math.min(100, pet.getHappinessLevel())));
+        pet.setHungerLevel(Math.max(0, Math.min(100, pet.getHungerLevel())));
 
         pet.setLastInteraction(LocalDateTime.now());
         return petRepository.save(pet);
@@ -89,10 +97,6 @@ public class PetService {
 
 
     public List<Pet> getAllPets() {
-        return petRepository.findAll();
-    }
-
-    public List<Pet> getPredefinedPets(){
         return petRepository.findAll();
     }
 
@@ -106,8 +110,14 @@ public class PetService {
     }
     public Pet getPetById(Long petId, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        boolean isAdmin = isAdmin(userDetails);
+        if (isAdmin) {
+            return petRepository.findById(petId)
+                    .orElseThrow(() -> new NoSuchElementException("Pet not found"));
+        }
         Pet pet = petRepository.findById(petId)
                 .orElseThrow(() -> new NoSuchElementException("Pet not found"));
+
         if (!pet.getOwner().getUsername().equals(userDetails.getUsername())) {
             throw new AccessDeniedException("Access denied to see this pet.");
         }

@@ -2,6 +2,7 @@ package S5.T2.virtual_pet_api_back.controllers;
 
 import S5.T2.virtual_pet_api_back.dto.PetActionRequest;
 import S5.T2.virtual_pet_api_back.dto.PetRequest;
+import S5.T2.virtual_pet_api_back.exception.AccessDeniedException;
 import S5.T2.virtual_pet_api_back.models.Pet;
 import S5.T2.virtual_pet_api_back.models.User;
 import S5.T2.virtual_pet_api_back.models.UserPrincipal;
@@ -25,6 +26,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/pets")
@@ -73,8 +75,9 @@ public class PetController {
     })
     @GetMapping("/{petId}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public Pet getPetById(@PathVariable Long petId, Authentication authentication) {
-        return petService.getPetById(petId, authentication);
+    public ResponseEntity<?> getPetById(@PathVariable Long petId, Authentication authentication) {
+        Pet pet = petService.getPetById(petId, authentication);
+        return ResponseEntity.ok(pet);
     }
 
     @Operation(summary = "Get pets by user ID", description = "Returns a list of pets owned by a specific user.")
@@ -90,6 +93,7 @@ public class PetController {
         User user = userPrincipal.getUser();
         String userRole = user.getRole().toUpperCase();
         log.info("User's role: "+userRole);
+
         if (userRole.equals(UserType.ROLE_ADMIN.name()) ) {
             return petService.getAllPets();
         } else {
@@ -107,18 +111,18 @@ public class PetController {
     })
     @PostMapping("/{petId}/update")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public ResponseEntity<Pet> updatePet(@PathVariable Long petId,
+    public ResponseEntity<?> updatePet(@PathVariable Long petId,
                                          @RequestBody PetActionRequest request, Authentication authentication ){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         boolean isAdmin = petService.isAdmin(userDetails);
-        boolean isOwner = petService.isOwner(userDetails, petId);
-        if(isAdmin || isOwner){
+
+        if (!isAdmin && !petService.isOwner(userDetails, petId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You do not have permission to update this pet.");
+        }
             String action = request.getAction();
             Pet updatedPet = petService.updatePet(userDetails, petId, action);
             return ResponseEntity.ok(updatedPet);
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
     }
 
 
