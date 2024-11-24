@@ -29,7 +29,7 @@ public class Pet {
 
     private boolean isDisguised = false;
 
-    @Transient
+
     private LocalDateTime lastInteraction;
 
 
@@ -51,6 +51,10 @@ public class Pet {
 
     public Long getPetId() {
         return petId;
+    }
+
+    public void setPetId(Long petId) {
+        this.petId = petId;
     }
 
     public PetType getType() {

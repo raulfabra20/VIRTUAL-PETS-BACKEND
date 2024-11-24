@@ -34,9 +34,15 @@ public class PetStatusService {
             }
             long minutesSinceLastInteraction = Duration.between(pet.getLastInteraction(), LocalDateTime.now()).toMinutes();
             if (minutesSinceLastInteraction > 1) {
-                log.info("Updating pet with ID: {} | Hunger: {} -> {} | Happiness: {} -> {}");
+                int previousHunger = pet.getHungerLevel();
+                int previousHappiness = pet.getHappinessLevel();
+
                 pet.adjustHungerLevel(5);
                 pet.adjustHappinessLevel(-2);
+
+                log.info("Updating pet with ID: {} | Hunger: {} -> {} | Happiness: {} -> {}",
+                        pet.getPetId(), previousHunger, pet.getHungerLevel(), previousHappiness, pet.getHappinessLevel());
+
                 petRepository.save(pet);
             }
         }
