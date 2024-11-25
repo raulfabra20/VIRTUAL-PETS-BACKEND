@@ -1,97 +1,138 @@
-Virtual Pet API Backend
-Este proyecto es una API para manejar un sistema de mascotas virtuales donde los usuarios pueden interactuar con Gremlins. Los usuarios pueden registrarse, iniciar sesión y realizar diversas acciones con sus mascotas. El proyecto está desarrollado en Java utilizando Spring Boot.
+# Virtual Pet API Backend
 
-Estructura del proyecto:
+API para administrar un sistema de mascotas virtuales interactivo, donde los usuarios pueden registrar, gestionar e interactuar con Gremlins. Desarrollado con **Spring Boot**.
+
+---
+
+## Tabla de Contenidos
+
+1. [Estructura del Proyecto](#estructura-del-proyecto)
+2. [Requisitos Previos](#requisitos-previos)
+3. [Dependencias Principales](#dependencias-principales)
+4. [Configuración](#configuración)
+5. [Ejecución](#ejecución)
+   - [Con Maven](#usando-maven)
+   - [Con Docker](#usando-docker)
+6. [Documentación de la API](#documentación-de-la-api)
+7. [Endpoints Principales](#endpoints-principales)
+8. [Autor](#autor)
+
+---
+
+## Estructura del Proyecto
+
+```plaintext
 src/
-  - main/
-    - java/
-      - S5/
-        - T2/
-          - virtual_pet_api_back/
-            - VirtualPetApiBackApplication.java    // Punto de entrada de la aplicación.
-            - config/                              // Configuraciones de seguridad, JWT y Swagger.
-              - JwtFilter.java
-              - SecurityConfig.java
-              - SwaggerConfig.java
-              - WebConfig.java
-            - controllers/                         // Controladores para usuarios y mascotas.
-              - PetController.java
-              - UserController.java
-            - dto/                                 // Objetos de transferencia de datos.
-              - LoginRequest.java
-              - PetActionRequest.java
-              - PetRequest.java
-              - RegisterRequest.java
-            - exception/                           // Manejo de excepciones personalizadas.
-              - AccessDeniedException.java
-              - GlobalExceptionHandler.java
-              - PetNotFoundException.java
-              - UserNotFoundException.java
-            - models/                              // Clases que representan las entidades del dominio.
-              - Pet.java
-              - PetType.java
-              - User.java
-              - UserPrincipal.java
-              - UserType.java
-            - repositories/                        // Interfaces de persistencia con base de datos.
-              - PetRepository.java
-              - UserRepository.java
-            - services/                            // Lógica de negocio y servicios.
-              - JWTService.java
-              - MyUserDetailsService.java
-              - PetService.java
-              - PetStatusService.java
-              - UserService.java
-    - resources/
-      - application.properties                    // Configuraciones principales de Spring Boot.
-  - test/
-    - java/
-      - S5/
-        - T2/
-          - virtual_pet_api_back/
-            - VirtualPetApiBackApplicationTests.java // Pruebas unitarias.
-Requisitos previos:
-Java JDK 23.
-Maven para la gestión de dependencias.
-Docker (opcional, para ejecutar en contenedor).
-Una base de datos SQL configurada (como MySQL).
+  ├── main/
+  │   ├── java/
+  │   │   ├── config/           // Configuración de seguridad, JWT y Swagger
+  │   │   ├── controllers/      // Controladores REST
+  │   │   ├── dto/              // Objetos de transferencia de datos
+  │   │   ├── exception/        // Manejo de excepciones personalizadas
+  │   │   ├── models/           // Entidades principales
+  │   │   ├── repositories/     // Persistencia de datos con JPA
+  │   │   └── services/         // Lógica de negocio
+  │   ├── resources/
+  │   │   └── application.properties
+  └── test/                     // Pruebas unitarias
+```
 
-Dependencias principales
-Spring Boot: Framework principal del proyecto.
-JWT: Para la autenticación basada en tokens.
-Swagger: Documentación de la API.
-Spring Security: Para la configuración de roles y acceso.
-Spring Data JPA: Para interacción con la base de datos.
+---
 
-Configuración
-Modifica el archivo application.properties en src/main/resources para incluir la configuración de tu base de datos, por ejemplo:
+## Requisitos Previos
+
+- **Java JDK 23**
+- **Maven**
+- **Docker** (opcional)
+- **Base de datos SQL** (como MySQL)
+
+---
+
+## Dependencias Principales
+
+| Dependencia        | Descripción                          |
+|--------------------|--------------------------------------|
+| Spring Boot        | Framework principal del proyecto    |
+| JWT                | Autenticación basada en tokens      |
+| Swagger            | Documentación de la API            |
+| Spring Security    | Configuración de roles y seguridad |
+| Spring Data JPA    | Interacción con la base de datos    |
+
+---
+
+## Configuración
+
+### Base de Datos
+
+Edita el archivo `application.properties` con las credenciales de tu base de datos:
+
+```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/virtual_pet_db
 spring.datasource.username=tu_usuario
 spring.datasource.password=tu_contraseña
-Ejecuta el proyecto para asegurarte de que las tablas se generen correctamente en la base de datos.
+spring.jpa.hibernate.ddl-auto=update
+```
 
-Puesta en marcha:
-Usando Maven
-Navega al directorio raíz del proyecto.
-Ejecuta:
-mvn clean install
-mvn spring-boot:run
+### JWT
 
-Usando Docker
-Asegúrate de que tienes un archivo Dockerfile y docker-compose.yml.
-Construye la imagen:
-docker-compose up --build
-Accede a la API en http://localhost:8080.
+Configura las claves secretas en `application.properties`:
 
-Endpoints principales
-Autenticación
-POST /login: Inicia sesión con un usuario registrado.
-POST /register: Crea un nuevo usuario.
+```properties
+jwt.secret=tu_clave_secreta
+jwt.expiration=3600000
+```
 
-Mascotas
-GET /pets: Obtiene todas las mascotas (solo admin) o las del usuario autenticado.
-POST /pets/create: Crea una nueva mascota.
-PUT /pets/{id}/update: Actualiza el estado de una mascota.
+---
 
-Documentación de la API
-La documentación Swagger está disponible en: http://localhost:8080/webjars/swagger-ui/index.html
+## Ejecución
+
+### Usando Maven
+
+1. Compila e instala el proyecto:
+   ```bash
+   mvn clean install
+   ```
+
+2. Ejecuta la aplicación:
+   ```bash
+   mvn spring-boot:run
+   ```
+
+### Usando Docker
+
+1. Construye y ejecuta el contenedor:
+   ```bash
+   docker-compose up --build
+   ```
+
+2. Accede a la API en [http://localhost:8080](http://localhost:8080).
+
+---
+
+## Documentación de la API
+
+Accede a la documentación Swagger en:  
+[http://localhost:8080/webjars/swagger-ui/index.html](http://localhost:8080/webjars/swagger-ui/index.html)
+
+---
+
+## Endpoints Principales
+
+### Autenticación
+
+| Método | Endpoint       | Descripción                  |
+|--------|----------------|------------------------------|
+| POST   | `/login`       | Inicia sesión.              |
+| POST   | `/register`    | Registra un nuevo usuario.  |
+
+### Mascotas
+
+| Método | Endpoint          | Descripción                                |
+|--------|-------------------|--------------------------------------------|
+| GET    | `/pets`           | Obtiene todas las mascotas (admin) o las propias. |
+| POST   | `/pets/create`    | Crea una nueva mascota.                   |
+| PUT    | `/pets/{id}/update` | Actualiza el estado de una mascota.       |
+
+---
+
+
