@@ -68,7 +68,10 @@ Para clonar y ejecutar este proyecto en tu entorno local:
 ```bash
 git clone https://github.com/tu-usuario/virtual-pet-api.git
 cd virtual-pet-api
+```
+---
 
+## Configuración
 
 ### Base de Datos
 
@@ -79,6 +82,7 @@ spring.datasource.url=jdbc:mysql://localhost:3306/virtual_pet_db
 spring.datasource.username=tu_usuario
 spring.datasource.password=tu_contraseña
 spring.jpa.hibernate.ddl-auto=update
+
 ```
 
 ### JWT
