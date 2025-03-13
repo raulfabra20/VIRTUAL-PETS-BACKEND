@@ -60,7 +60,15 @@ src/
 
 ---
 
-## Configuración
+## Instalación
+
+Para clonar y ejecutar este proyecto en tu entorno local:
+
+### Clonar el repositorio
+```bash
+git clone https://github.com/tu-usuario/virtual-pet-api.git
+cd virtual-pet-api
+
 
 ### Base de Datos
 
@@ -132,7 +140,7 @@ Accede a la documentación Swagger en:
 | GET    | `/pets`           | Obtiene todas las mascotas (admin) o las propias. |
 | POST   | `/pets/create`    | Crea una nueva mascota.                   |
 | PUT    | `/pets/{id}/update` | Actualiza el estado de una mascota.       |
-
+| DELETE | `/pets/{id}/delete` | Elimina una mascota.                     |
 ---
 
 
