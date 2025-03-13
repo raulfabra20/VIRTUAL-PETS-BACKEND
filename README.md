@@ -43,8 +43,8 @@ src/
 
 - **Java JDK 23**
 - **Maven**
-- **Docker** (opcional)
-- **Base de datos SQL** (como MySQL)
+- **Docker** 
+- **Base de datos SQL** 
 
 ---
 
