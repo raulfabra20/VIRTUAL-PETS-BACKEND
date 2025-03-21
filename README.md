@@ -15,7 +15,7 @@ API para administrar un sistema de mascotas virtuales interactivo, donde los usu
    - [Con Docker](#usando-docker)
 6. [Documentación de la API](#documentación-de-la-api)
 7. [Endpoints Principales](#endpoints-principales)
-8. [Autor](#autor)
+8. [Imágenes de la app](#imagenes-de-la-app)
 
 ---
 
@@ -146,5 +146,43 @@ Accede a la documentación Swagger en:
 | PUT    | `/pets/{id}/update` | Actualiza el estado de una mascota.       |
 | DELETE | `/pets/{id}/delete` | Elimina una mascota.                     |
 ---
+
+## Imágenes de la App
+
+### **Pantalla de Inicio**
+
+![Página Principal](images/Main-page.png)
+
+
+### **Inicio de Sesión**
+
+![Página de Inicio de Sesión](images/login-pet-page.png)
+
+
+### **Registro de Usuario**
+
+![Página de Registro de Usuario](images/register-page.png)
+
+
+### **Visualizar Mascotas Creadas**
+
+![Página de visualización de Mascotas Creadas](images/my-gremlins-page.png)
+
+
+### **Creación de Mascota**
+
+![Página de Creación de Mascota](images/create-pet-page.png)
+
+
+### **Interacción con la Mascota**
+
+| Acción | Captura |
+|--------|---------|
+| Mascota Hambrienta | ![Interacción 1](images/interaction-with-pet-page1.png) |
+| Alimentar Mascota | ![Interacción 2](images/interaction-with-pet-page2.png) |
+| Disfrazar Mascota | ![Interacción 3](images/interaction-with-pet-page3.png) |
+| Encender Luz | ![Interacción 4](images/interaction-with-pet-page4.png) |
+
+
 
 
